@@ -1,14 +1,17 @@
 
 import React, { useState, useEffect } from 'react';
 import { DB } from '../services/supabaseClient';
+import { BlogPost } from '../types';
 
-export const STATIC_BLOG_POSTS = [
+export const STATIC_BLOG_POSTS: BlogPost[] = [
   {
     id: 'static-1',
     title: 'How to Choose the Right Home Loan in 2024',
     category: 'Finance',
+    created_at: '2024-03-15T12:00:00Z',
     date: 'March 15, 2024',
     image: 'https://images.unsplash.com/photo-1560518883-ce09059eeffa?auto=format&fit=crop&q=80&w=800',
+    image_url: 'https://images.unsplash.com/photo-1560518883-ce09059eeffa?auto=format&fit=crop&q=80&w=800',
     excerpt: 'Navigating the complex world of interest rates and eligibility can be daunting. Here is our expert guide.',
     content: `Choosing a home loan is one of the most significant financial decisions...`
   }
@@ -19,14 +22,14 @@ interface BlogProps {
 }
 
 const Blog: React.FC<BlogProps> = ({ onOpenPost }) => {
-  const [blogs, setBlogs] = useState<any[]>([]);
+  const [blogs, setBlogs] = useState<BlogPost[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     async function loadBlogs() {
       try {
         const data = await DB.getBlogs();
-        setBlogs(data && data.length > 0 ? data : STATIC_BLOG_POSTS);
+        setBlogs(data && data.length > 0 ? (data as BlogPost[]) : STATIC_BLOG_POSTS);
       } catch (err) {
         setBlogs(STATIC_BLOG_POSTS);
       } finally {
@@ -63,12 +66,12 @@ const Blog: React.FC<BlogProps> = ({ onOpenPost }) => {
                 onClick={() => onOpenPost(post.id)}
               >
                 <div className="relative overflow-hidden rounded-2xl mb-6 h-48">
-                  <img src={post.image_url || post.image} alt={post.title} className="w-full h-full object-cover transform group-hover:scale-105 transition-transform duration-500" />
+                  <img src={(post.image_url || post.image) + '&w=600&q=80'} alt={post.title} className="w-full h-full object-cover transform group-hover:scale-105 transition-transform duration-500" />
                   <div className="absolute top-4 left-4">
                     <span className="bg-[#0A3D62] text-white text-[10px] px-3 py-1.5 rounded-full font-bold uppercase tracking-widest shadow-lg">{post.category}</span>
                   </div>
                 </div>
-                <p className="text-slate-400 text-[10px] mb-2 font-bold uppercase tracking-wider">{new Date(post.created_at || post.date).toLocaleDateString()}</p>
+                <p className="text-slate-400 text-[10px] mb-2 font-bold uppercase tracking-wider">{new Date(post.created_at || post.date || '').toLocaleDateString()}</p>
                 <h3 className="text-xl font-bold text-slate-800 group-hover:text-[#0A3D62] transition-colors leading-tight mb-4 line-clamp-2">
                   {post.title}
                 </h3>

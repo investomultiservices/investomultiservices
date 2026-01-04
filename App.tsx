@@ -30,6 +30,18 @@ const App: React.FC = () => {
   const [currentPage, setCurrentPage] = useState<PageView>('home');
   const [selectedPostId, setSelectedPostId] = useState<string | null>(null);
 
+  // Secret Developer Access: Ctrl + Alt + Shift + A
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.ctrlKey && e.altKey && e.shiftKey && e.key === 'A') {
+        setCurrentPage(prev => prev === 'admin' ? 'home' : 'admin');
+        console.log("Developer Mode Toggled");
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, []);
+
   // Dynamic Title and SEO Meta Update
   useEffect(() => {
     window.scrollTo(0, 0);
@@ -40,7 +52,7 @@ const App: React.FC = () => {
       blog: 'Latest Blog & Insights | Investo Multiservices',
       portfolio: 'Success Stories | Our Portfolio | Investo Multiservices',
       contact: 'Contact Experts | Get in Touch | Investo Multiservices Rajur',
-      'blog-post': 'Read Article | Investo Insights',
+      'blog-post': 'Loading Insight...', // Placeholder, BlogPostView overrides this once data is loaded
       admin: 'Admin Console | Investo Management',
       'service-details': 'Service Details | Investo Multiservices',
       'financial-services': 'Expert Financial Solutions | Home & Personal Loans | Investo',
@@ -62,7 +74,7 @@ const App: React.FC = () => {
         return (
           <>
             <Hero setCurrentPage={setCurrentPage} />
-            <Stats />
+            <Stats setCurrentPage={setCurrentPage} />
             <section className="py-24 bg-white border-y border-slate-100">
               <Services setCurrentPage={setCurrentPage} />
             </section>
@@ -74,13 +86,26 @@ const App: React.FC = () => {
       case 'about': return <About />;
       case 'services': return <ServicesPage setCurrentPage={setCurrentPage} />;
       case 'blog': return <Blog onOpenPost={handleOpenPost} />;
-      case 'blog-post': return <BlogPostView postId={selectedPostId} onBack={() => setCurrentPage('blog')} />;
-      case 'portfolio': return <PortfolioPage />;
+      case 'blog-post': 
+        return (
+          <BlogPostView 
+            postId={selectedPostId} 
+            onBack={() => setCurrentPage('blog')} 
+            setCurrentPage={setCurrentPage} 
+          />
+        );
+      case 'portfolio': return <PortfolioPage setCurrentPage={setCurrentPage} />;
       case 'contact': return <Contact />;
       case 'admin': return <Admin />;
-      case 'service-details': return <ServiceDetailsPlaceholder onBack={() => setCurrentPage('home')} />;
+      case 'service-details': 
+        return (
+          <ServiceDetailsPlaceholder 
+            onBack={() => setCurrentPage('home')} 
+            onContactClick={() => setCurrentPage('contact')}
+          />
+        );
       
-      // New Dedicated Service Pages
+      // Dedicated Service Pages
       case 'financial-services': return <FinancialServices setCurrentPage={setCurrentPage} />;
       case 'digital-services': return <DigitalServices setCurrentPage={setCurrentPage} />;
       case 'csc-services': return <CSCServices setCurrentPage={setCurrentPage} />;
@@ -101,13 +126,6 @@ const App: React.FC = () => {
       </main>
 
       {currentPage !== 'admin' && <Footer setCurrentPage={setCurrentPage} />}
-      
-      <button 
-        onClick={() => setCurrentPage('admin')}
-        className="fixed bottom-4 left-4 text-[10px] bg-slate-900/50 hover:bg-slate-800 text-slate-700 px-2 py-1 rounded opacity-10 hover:opacity-100 transition-all z-50"
-      >
-        Admin Portal
-      </button>
     </div>
   );
 };

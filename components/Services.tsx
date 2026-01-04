@@ -8,28 +8,32 @@ const SERVICE_PILLARS = [
     summary: 'Professional financial consulting for home loans, personal credits, and life insurance in Rajur Akole.',
     items: ['Home Loan & Mortgage Specialist', 'Life Insurance & Mediclaim Plans', 'Personal & Business Loans', 'Expert Financial Consultation'],
     icon: 'M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z',
-    color: '#0A3D62'
+    color: '#0A3D62',
+    view: 'financial-services' as PageView
   },
   {
     title: 'Digital & Web Solutions',
     summary: 'Custom website design, SEO, and digital marketing services to grow your business online in Akole.',
     items: ['Custom Website Development', 'Local SEO & Google Ranking', 'Social Media Digital Marketing', 'E-commerce & Business Portals'],
     icon: 'M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z',
-    color: '#78C800'
+    color: '#78C800',
+    view: 'digital-services' as PageView
   },
   {
     title: 'Govt (CSC) & PAN Center',
     summary: 'Authorised CSC center in Rajur for fast PAN card applications, caste, and income certificates.',
     items: ['New PAN Card & Corrections', 'Income & Caste Certificates', 'Domicile & Gazetted Services', 'Farmer ID & Govt Schemes'],
     icon: 'M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4',
-    color: '#FF8C00'
+    color: '#FF8C00',
+    view: 'csc-services' as PageView
   },
   {
     title: 'Documentation & Jobs',
     summary: 'Online job application center with professional typing, Xerox, and documentation support in Akole.',
     items: ['Govt Job Online Applications', 'English & Marathi Typing Work', 'Documentation & Spiral Binding', 'Xerox, Scanning & Lamination'],
     icon: 'M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z',
-    color: '#64748b'
+    color: '#64748b',
+    view: 'office-support' as PageView
   }
 ];
 
@@ -99,10 +103,10 @@ const Services: React.FC<ServicesProps> = ({ setCurrentPage }) => {
               ))}
             </ul>
             <button 
-              onClick={() => setCurrentPage('service-details')}
+              onClick={() => setCurrentPage(pillar.view)}
               className="w-full py-3 bg-slate-50 border border-slate-100 rounded-xl text-xs font-bold text-slate-600 uppercase tracking-widest hover:bg-[#0A3D62] hover:text-white hover:border-[#0A3D62] transition-all group-hover:shadow-lg"
             >
-              Learn More
+              Explore Services
             </button>
           </div>
         ))}

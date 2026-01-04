@@ -1,6 +1,11 @@
 
 import React from 'react';
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, Cell } from 'recharts';
+import { PageView } from '../App';
+
+interface StatsProps {
+  setCurrentPage?: (page: PageView) => void;
+}
 
 const data = [
   { name: '2021', value: 120 },
@@ -9,7 +14,7 @@ const data = [
   { name: '2024', value: 680 },
 ];
 
-const Stats: React.FC = () => {
+const Stats: React.FC<StatsProps> = ({ setCurrentPage }) => {
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-24 bg-white">
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-20 items-start">
@@ -23,12 +28,12 @@ const Stats: React.FC = () => {
 
           {/* Contact Action Section */}
           <div className="mb-12 space-y-4">
-            <a 
-              href="tel:+919529922984"
+            <button 
+              onClick={() => setCurrentPage?.('contact')}
               className="block w-full text-center bg-[#0A3D62] hover:bg-[#002244] text-white py-4 rounded-xl font-bold text-sm tracking-widest transition-all shadow-lg hover:shadow-brand-blue/20 transform hover:-translate-y-0.5"
             >
-              CONSULT OUR EXPERTS
-            </a>
+              REQUEST A FREE QUOTE
+            </button>
             
             <div className="grid grid-cols-3 gap-3">
               <a 
@@ -77,7 +82,7 @@ const Stats: React.FC = () => {
         </div>
         
         {/* Chart Content Area */}
-        <div className="lg:col-span-2 h-[500px] bg-slate-50 rounded-3xl p-8 border border-slate-100 shadow-inner">
+        <div className="lg:col-span-2 h-[500px] bg-slate-50 rounded-3xl p-8 border border-slate-100 shadow-inner overflow-hidden">
           <ResponsiveContainer width="100%" height="100%">
             <BarChart data={data}>
               <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{fill: '#64748b', fontSize: 12}} />

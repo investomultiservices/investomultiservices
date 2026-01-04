@@ -8,11 +8,11 @@ interface HeroProps {
 
 const Hero: React.FC<HeroProps> = ({ setCurrentPage }) => {
   return (
-    <div className="relative bg-white pt-24">
-      {/* Background Image Container */}
-      <div className="relative h-[450px] md:h-[550px] w-full overflow-hidden">
+    <div className="relative bg-white pt-28 lg:pt-32">
+      {/* Background Image Container - Optimized for faster LCP */}
+      <div className="relative h-[450px] md:h-[550px] w-full overflow-hidden lg:rounded-b-[4rem]">
         <img 
-          src="https://images.unsplash.com/photo-1600880212340-053459a139ad?q=80&w=2000&auto=format&fit=crop" 
+          src="https://images.unsplash.com/photo-1600880212340-053459a139ad?q=80&w=1400&auto=format&fit=crop" 
           alt="Business Professionals" 
           className="w-full h-full object-cover grayscale-[20%]"
         />
@@ -37,7 +37,7 @@ const Hero: React.FC<HeroProps> = ({ setCurrentPage }) => {
         </div>
       </div>
 
-      {/* Responsive Card Section - Updated to reflect actual service categories */}
+      {/* Responsive Card Section */}
       <div className="relative lg:-mt-20 z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-12 mt-8 lg:mt-0">
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 lg:gap-0 lg:corporate-card-shadow lg:rounded-xl overflow-hidden">
           {/* Card 1: Individuals */}

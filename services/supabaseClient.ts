@@ -1,15 +1,24 @@
 
 import { createClient } from '@supabase/supabase-js';
 
-// These would normally come from environment variables
-const supabaseUrl = process.env.SUPABASE_URL || 'https://your-project.supabase.co';
-const supabaseAnonKey = process.env.SUPABASE_ANON_KEY || 'your-anon-key';
+const supabaseUrl = process.env.SUPABASE_URL || 'https://placeholder.supabase.co';
+const supabaseAnonKey = process.env.SUPABASE_ANON_KEY || 'placeholder-key';
+
+// Helper to check if credentials are valid
+const hasValidCredentials = 
+  supabaseUrl !== 'https://placeholder.supabase.co' && 
+  supabaseAnonKey !== 'placeholder-key';
+
+if (!hasValidCredentials) {
+  console.warn("Supabase credentials are not configured. Database features will be disabled.");
+}
 
 export const supabase = createClient(supabaseUrl, supabaseAnonKey);
 
-// Database helpers
+// Database helpers with added safety checks
 export const DB = {
   async getBlogs() {
+    if (!hasValidCredentials) return null;
     const { data, error } = await supabase
       .from('blogs')
       .select('*')
@@ -19,6 +28,7 @@ export const DB = {
   },
   
   async createBlog(blog: any) {
+    if (!hasValidCredentials) throw new Error("DB not configured");
     const { data, error } = await supabase
       .from('blogs')
       .insert([blog])
@@ -28,6 +38,7 @@ export const DB = {
   },
 
   async deleteBlog(id: string) {
+    if (!hasValidCredentials) throw new Error("DB not configured");
     const { error } = await supabase
       .from('blogs')
       .delete()
@@ -36,6 +47,7 @@ export const DB = {
   },
 
   async getEnquiries() {
+    if (!hasValidCredentials) return null;
     const { data, error } = await supabase
       .from('enquiries')
       .select('*')
@@ -45,6 +57,10 @@ export const DB = {
   },
 
   async submitEnquiry(enquiry: any) {
+    if (!hasValidCredentials) {
+      console.log("Mocking enquiry submission (DB not configured):", enquiry);
+      return;
+    }
     const { error } = await supabase
       .from('enquiries')
       .insert([enquiry]);

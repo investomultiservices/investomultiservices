@@ -1,7 +1,7 @@
 
-import React, { useState, useMemo } from 'react';
-import { generateServiceConsultation } from '../services/geminiService';
-import { GenerationState } from '../types';
+import React, { useState, useMemo, useRef, useEffect } from 'react';
+import { getAIChatResponse } from '../services/geminiService';
+import { GenerationState, ChatMessage } from '../types';
 
 const DOCUMENT_LISTS: Record<string, string[]> = {
   'Home Loan': ['Aadhaar Card', 'PAN Card', '3 Months Salary Slips', '6 Months Bank Statement', 'Form 16 / ITR', 'Property Documents'],
@@ -14,8 +14,9 @@ const DOCUMENT_LISTS: Record<string, string[]> = {
 
 const AISection: React.FC = () => {
   const [query, setQuery] = useState('');
-  const [serviceType, setServiceType] = useState('Financial Services');
+  const [history, setHistory] = useState<ChatMessage[]>([]);
   const [selectedDocCategory, setSelectedDocCategory] = useState<string | null>(null);
+  const chatEndRef = useRef<HTMLDivElement>(null);
   
   const [emiData, setEmiData] = useState({
     amount: 1000000,
@@ -29,16 +30,32 @@ const AISection: React.FC = () => {
     error: null
   });
 
+  useEffect(() => {
+    chatEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+  }, [history, status.loading]);
+
   const handleConsult = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!query) return;
+    if (!query.trim() || status.loading) return;
 
+    const userMessage = query;
+    setQuery('');
     setStatus({ loading: true, result: null, error: null });
+
     try {
-      const advice = await generateServiceConsultation(query, serviceType);
+      const advice = await getAIChatResponse(userMessage, history);
+      setHistory(prev => [
+        ...prev,
+        { role: 'user', parts: [{ text: userMessage }] },
+        { role: 'model', parts: [{ text: advice }] }
+      ]);
       setStatus({ loading: false, result: advice, error: null });
     } catch (err) {
-      setStatus({ loading: false, result: null, error: 'Network error. Please try again.' });
+      setStatus({ 
+        loading: false, 
+        result: null, 
+        error: err instanceof Error ? err.message : 'Something went wrong.' 
+      });
     }
   };
 
@@ -158,60 +175,72 @@ const AISection: React.FC = () => {
           </div>
         </div>
 
-        {/* AI Consultation Section */}
+        {/* Chat-based AI Consultation Section */}
         <div className="sticky top-40">
-          <div className="bg-white p-12 rounded-3xl shadow-2xl relative overflow-hidden border border-slate-100">
+          <div className="bg-white p-6 md:p-10 rounded-3xl shadow-2xl relative overflow-hidden border border-slate-100 flex flex-col h-[700px]">
             <div className="absolute top-0 right-0 w-48 h-48 bg-[#0A3D62]/5 rounded-full blur-3xl -z-10"></div>
             
-            <div className="mb-10 text-center">
-              <h4 className="text-2xl font-extrabold text-[#0A3D62] mb-2">Service Consultant AI</h4>
-              <p className="text-slate-400 text-sm italic font-medium">Expert preliminary guidance in seconds.</p>
+            <div className="mb-6 text-center shrink-0">
+              <h4 className="text-2xl font-extrabold text-[#0A3D62] mb-1">Investo AI Consultant</h4>
+              <p className="text-slate-400 text-xs italic font-medium">Chat with our context-aware assistant.</p>
             </div>
 
-            <form onSubmit={handleConsult} className="space-y-8">
-              <div>
-                <label className="block text-[10px] font-bold text-slate-400 mb-2 uppercase tracking-widest">Service Stream</label>
-                <select 
-                  value={serviceType}
-                  onChange={(e) => setServiceType(e.target.value)}
-                  className="w-full bg-slate-50 border border-slate-200 rounded-xl px-5 py-4 text-slate-800 font-medium focus:ring-2 focus:ring-[#0A3D62] outline-none appearance-none"
-                >
-                  <option>Financial Services</option>
-                  <option>Digital Services</option>
-                  <option>CSC (Govt) Services</option>
-                  <option>Office Support</option>
-                </select>
-              </div>
-              <div>
-                <label className="block text-[10px] font-bold text-slate-400 mb-2 uppercase tracking-widest">Your Inquiry</label>
-                <textarea 
-                  value={query}
-                  onChange={(e) => setQuery(e.target.value)}
-                  placeholder="e.g. How can I accelerate my home loan application for a property in Akole?"
-                  className="w-full bg-slate-50 border border-slate-200 rounded-xl px-5 py-4 text-slate-800 focus:ring-2 focus:ring-[#0A3D62] h-40 outline-none resize-none"
-                  required
-                />
-              </div>
+            <div className="flex-grow overflow-y-auto mb-6 space-y-4 pr-2 custom-scrollbar">
+              {history.length === 0 && !status.loading && (
+                <div className="text-center py-10">
+                  <div className="w-16 h-16 bg-slate-50 rounded-full flex items-center justify-center mx-auto mb-4 text-[#0A3D62]">
+                    <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z"/></svg>
+                  </div>
+                  <p className="text-slate-400 text-sm">Ask about loans, documents, or digital services to begin your consultation.</p>
+                </div>
+              )}
+              
+              {history.map((msg, i) => (
+                <div key={i} className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}>
+                  <div className={`max-w-[85%] p-4 rounded-2xl text-sm leading-relaxed ${
+                    msg.role === 'user' 
+                      ? 'bg-[#0A3D62] text-white rounded-br-none shadow-md' 
+                      : 'bg-slate-100 text-slate-700 rounded-bl-none border border-slate-200'
+                  }`}>
+                    {msg.parts[0].text}
+                  </div>
+                </div>
+              ))}
+              
+              {status.loading && (
+                <div className="flex justify-start">
+                  <div className="bg-slate-100 p-4 rounded-2xl rounded-bl-none border border-slate-200 flex items-center space-x-2">
+                    <div className="w-1.5 h-1.5 bg-slate-400 rounded-full animate-bounce"></div>
+                    <div className="w-1.5 h-1.5 bg-slate-400 rounded-full animate-bounce [animation-delay:0.2s]"></div>
+                    <div className="w-1.5 h-1.5 bg-slate-400 rounded-full animate-bounce [animation-delay:0.4s]"></div>
+                  </div>
+                </div>
+              )}
+
+              {status.error && (
+                <div className="p-3 bg-rose-50 text-rose-500 text-xs rounded-xl text-center border border-rose-100 font-bold">
+                  {status.error}
+                </div>
+              )}
+              <div ref={chatEndRef} />
+            </div>
+
+            <form onSubmit={handleConsult} className="mt-auto pt-4 border-t border-slate-100 flex space-x-3 shrink-0">
+              <input 
+                value={query}
+                onChange={(e) => setQuery(e.target.value)}
+                placeholder="Type your question..."
+                className="flex-grow bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm text-slate-800 focus:ring-2 focus:ring-[#0A3D62] outline-none"
+                disabled={status.loading}
+              />
               <button 
                 type="submit"
-                disabled={status.loading}
-                className={`w-full py-5 rounded-full font-bold text-lg transition-all ${status.loading ? 'bg-slate-200 text-slate-400 cursor-not-allowed' : 'bg-[#0A3D62] hover:bg-[#002244] text-white shadow-xl active:scale-95'}`}
+                disabled={status.loading || !query.trim()}
+                className={`p-3 rounded-xl transition-all ${status.loading ? 'bg-slate-200 text-slate-400' : 'bg-[#0A3D62] text-white hover:bg-[#002244] shadow-lg active:scale-95'}`}
               >
-                {status.loading ? 'Analyzing...' : 'Generate Action Plan'}
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"/></svg>
               </button>
             </form>
-
-            {status.result && (
-              <div className="mt-10 p-8 bg-slate-50 border border-slate-100 rounded-3xl animate-fade-in max-h-80 overflow-y-auto">
-                <div className="flex items-center space-x-3 mb-6">
-                  <div className="w-2.5 h-2.5 bg-[#FF8C00] rounded-full animate-pulse"></div>
-                  <p className="text-[#0A3D62] text-[10px] font-bold uppercase tracking-widest">Recommended Approach</p>
-                </div>
-                <div className="text-slate-600 text-sm leading-relaxed whitespace-pre-wrap font-medium">
-                  {status.result}
-                </div>
-              </div>
-            )}
           </div>
         </div>
       </div>
